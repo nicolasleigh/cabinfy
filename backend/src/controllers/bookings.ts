@@ -1,19 +1,18 @@
-import { NextFunction, Request, Response } from 'express';
-import prisma from '../../prisma/client.js';
-import { bookingSchema } from '../../prisma/validation.js';
+import { NextFunction, Request, Response } from "express";
+import prisma from "../../prisma/client.js";
+import { bookingSchema } from "../../prisma/validation.js";
 
-export const createBooking = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const createBooking = async (req: Request, res: Response, next: NextFunction) => {
   // console.log(req.user);
   // @ts-ignore
   const { uid } = req.user;
-  if (!uid) return res.json({ error: 'Invalid user' });
+  if (!uid) return res.json({ error: "Invalid user" });
+
+  // console.log("req.body--", req.body);
 
   const result = bookingSchema.safeParse(req.body);
   if (!result.success) {
+    console.log(result.error);
     return res.status(400).json({ error: result.error.issues[0].message });
   }
   const {
@@ -38,7 +37,7 @@ export const createBooking = async (
   });
 
   if (!user) {
-    res.status(404).json({ message: 'User not found' });
+    res.status(404).json({ message: "User not found" });
     return;
   }
 
@@ -78,11 +77,7 @@ interface Query {
   page: number;
 }
 
-export const getBookings = async (
-  req: Request<{}, {}, {}, Query>,
-  res: Response,
-  next: NextFunction
-) => {
+export const getBookings = async (req: Request<{}, {}, {}, Query>, res: Response, next: NextFunction) => {
   const { filter, sortBy, page } = req.query;
 
   try {
@@ -113,11 +108,7 @@ export const getBookings = async (
   }
 };
 
-export const getBooking = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getBooking = async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   try {
     const booking = await prisma.bookings.findUnique({
@@ -135,11 +126,7 @@ export const getBooking = async (
   }
 };
 
-export const updateBooking = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const updateBooking = async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   // const result = bookingSchema.safeParse(req.body);
   // if (!result.success) {
@@ -166,11 +153,7 @@ export const updateBooking = async (
   }
 };
 
-export const deleteBooking = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const deleteBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
 
@@ -189,11 +172,7 @@ interface DateQuery {
   date: string;
 }
 
-export const getBookingsAfterDate = async (
-  req: Request<{}, {}, {}, DateQuery>,
-  res: Response,
-  next: NextFunction
-) => {
+export const getBookingsAfterDate = async (req: Request<{}, {}, {}, DateQuery>, res: Response, next: NextFunction) => {
   try {
     const { date } = req.query;
 
@@ -215,11 +194,7 @@ export const getBookingsAfterDate = async (
   }
 };
 
-export const getStaysAfterDate = async (
-  req: Request<{}, {}, {}, DateQuery>,
-  res: Response,
-  next: NextFunction
-) => {
+export const getStaysAfterDate = async (req: Request<{}, {}, {}, DateQuery>, res: Response, next: NextFunction) => {
   try {
     const { date } = req.query;
 
@@ -240,11 +215,7 @@ export const getStaysAfterDate = async (
   }
 };
 
-export const getTodayActivity = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getTodayActivity = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const today = new Date().toISOString().slice(0, 10);
     const bookings = await prisma.bookings.findMany({
@@ -255,7 +226,7 @@ export const getTodayActivity = async (
               equals: new Date(today),
             },
             status: {
-              equals: 'unconfirmed',
+              equals: "unconfirmed",
             },
           },
           {
@@ -263,7 +234,7 @@ export const getTodayActivity = async (
               equals: new Date(today),
             },
             status: {
-              equals: 'checked-in',
+              equals: "checked-in",
             },
           },
         ],
@@ -272,7 +243,7 @@ export const getTodayActivity = async (
         guest: true,
       },
       orderBy: {
-        created_at: 'asc',
+        created_at: "asc",
       },
     });
     res.json(bookings);
@@ -281,11 +252,7 @@ export const getTodayActivity = async (
   }
 };
 
-export const getBookingByCabinId = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getBookingByCabinId = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const bookings = await prisma.bookings.findMany({
